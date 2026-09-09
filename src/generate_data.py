@@ -2,16 +2,17 @@
 generate_data.py
 ================
 Author : Ujjwal Deep
-Project: Simple Demand Forecast (ML Basics - Day 1)
+Project: Simple Demand Forecast (ML Basics)
 
 What this file does:
 --------------------
 Since I don't have a real dataset, I'm generating fake (synthetic) data
 that looks realistic. The demand has:
-  1. An upward TREND  → the product gets more popular over time
-  2. WEEKEND SPIKES   → people shop more on Sat/Sun
-  3. SUMMER PEAK      → demand is higher in summer (Jun-Aug)
-  4. RANDOM NOISE     → real data is never perfectly smooth
+  1. An upward TREND    → the product gets more popular over time
+  2. WEEKEND SPIKES     → people shop more on Sat/Sun
+  3. SUMMER PEAK        → demand is higher in summer (Jun-Aug)
+  4. HOLIDAY SPIKES     → big spikes on public holidays (Christmas, Thanksgiving etc.)
+  5. RANDOM NOISE       → real data is never perfectly smooth
 
 Output: data/demand_data.csv  (730 rows = 2 years of daily data)
 """
@@ -19,6 +20,7 @@ Output: data/demand_data.csv  (730 rows = 2 years of daily data)
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from pandas.tseries.holiday import USFederalHolidayCalendar
 
 
 def generate_demand(start_date="2022-01-01", periods=730, seed=42):
@@ -54,11 +56,19 @@ def generate_demand(start_date="2022-01-01", periods=730, seed=42):
     day_of_year = dates.dayofyear.to_numpy().astype(float)
     monthly = 20.0 * np.sin(2.0 * np.pi * (day_of_year - 80.0) / 365.0)
 
-    # --- Component 4: Random noise (mean=0, std=12) -------------------------
+    # --- Component 4: Holiday spikes (+40 units on public holidays) ---------
+    # We use the US Federal Holiday calendar from pandas.
+    # Holidays like Christmas, Thanksgiving, New Year etc. tend to spike demand.
+    cal      = USFederalHolidayCalendar()
+    holidays = cal.holidays(start=dates.min(), end=dates.max())
+    holiday_flag = np.isin(dates, holidays).astype(float)
+    holiday_boost = holiday_flag * 40.0
+
+    # --- Component 5: Random noise (mean=0, std=12) -------------------------
     noise = rng.normal(0.0, 12.0, periods)
 
     # Add all components together, clip at 0 (demand can't be negative)
-    demand = np.clip(trend + weekly + monthly + noise, 0, None)
+    demand = np.clip(trend + weekly + monthly + holiday_boost + noise, 0, None)
     demand = demand.round().astype(int)
 
     df = pd.DataFrame({"date": dates, "demand": demand})

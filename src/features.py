@@ -2,7 +2,7 @@
 features.py
 ===========
 Author : Ujjwal Deep
-Project: Simple Demand Forecast (ML Basics - Day 1)
+Project: Simple Demand Forecast (ML Basics)
 
 What this file does:
 --------------------
@@ -10,6 +10,7 @@ Raw data only has 'date' and 'demand'. A model can't learn from a date string!
 So we create NEW columns (features) that the model CAN learn from:
 
   Calendar features  → tell the model what time of year/week it is
+  Holiday feature    → flags public holidays (Christmas, Thanksgiving, etc.)
   Lag features       → tell the model what demand looked like in the past
   Rolling mean       → smoothed recent demand level
 
@@ -18,6 +19,11 @@ Why lag features?
 If demand was high last week (lag_7), it's likely high this week too.
 This is the key insight in time-series forecasting.
 
+Why holidays?
+-------------
+Holidays cause unusual spikes in demand that the model would otherwise
+treat as noise. Flagging them explicitly lets the model learn their pattern.
+
 Why rolling mean?
 -----------------
 Averages out the noise in recent demand, giving the model a cleaner signal.
@@ -25,6 +31,7 @@ Averages out the noise in recent demand, giving the model a cleaner signal.
 
 import pandas as pd
 import numpy as np
+from pandas.tseries.holiday import USFederalHolidayCalendar
 
 
 def add_calendar_features(df):
@@ -50,6 +57,25 @@ def add_calendar_features(df):
     df["week_of_year"] = df["date"].dt.isocalendar().week.astype(int)
     df["is_weekend"]   = (df["day_of_week"] >= 5).astype(int)   # 1 if Sat/Sun
 
+    return df
+
+
+def add_holiday_features(df):
+    """
+    Add a binary flag for US public holidays.
+
+    Uses pandas' built-in USFederalHolidayCalendar which includes:
+    New Year's Day, MLK Day, Presidents' Day, Memorial Day,
+    Independence Day, Labor Day, Columbus Day, Veterans Day,
+    Thanksgiving, Christmas Day.
+
+    New column added:
+      is_holiday - 1 if the date is a US federal holiday, else 0
+    """
+    df = df.copy()
+    cal      = USFederalHolidayCalendar()
+    holidays = cal.holidays(start=df["date"].min(), end=df["date"].max())
+    df["is_holiday"] = df["date"].isin(holidays).astype(int)
     return df
 
 
@@ -91,6 +117,7 @@ def get_feature_columns():
         "month",
         "week_of_year",
         "is_weekend",
+        "is_holiday",       # <-- new!
         "lag_7",
         "lag_14",
         "rolling_mean_7",

@@ -82,6 +82,7 @@ demand_forecast/
 | `month` | Month number (seasonal pattern) |
 | `week_of_year` | Annual weekly cycle |
 | `is_weekend` | Binary flag: 1 if Sat or Sun |
+| `is_holiday` | Binary flag: 1 if US public holiday (Christmas, Thanksgiving etc.) |
 | `lag_7` | Demand from 7 days ago |
 | `lag_14` | Demand from 14 days ago |
 | `rolling_mean_7` | Average demand over the past 7 days |
@@ -133,7 +134,7 @@ jupyter notebook notebooks/demand_forecast.ipynb
 ## 🔮 What I Would Add Next
 
 - [ ] Try more models (Random Forest, XGBoost)
-- [ ] Add real holidays as features
+- [x] Add real holidays as features ✅
 - [ ] Forecast multiple products at once
 - [ ] Deploy as a simple web app (Flask/Streamlit)
 

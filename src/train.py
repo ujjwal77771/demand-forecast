@@ -69,12 +69,15 @@ def load_and_prepare(path):
     Load the CSV, then apply all feature engineering.
     Drop the first 14 rows that have NaN (from lag features).
     """
-    from features import add_calendar_features, add_lag_features
+    from features import add_calendar_features, add_holiday_features, add_lag_features
 
     df = pd.read_csv(path, parse_dates=["date"])
 
     # Add calendar features (trend, day_of_week, month, etc.)
     df = add_calendar_features(df)
+
+    # Add holiday flag (is_holiday = 1 on public holidays)
+    df = add_holiday_features(df)
 
     # Add lag features (lag_7, lag_14, rolling_mean_7)
     df = add_lag_features(df)
