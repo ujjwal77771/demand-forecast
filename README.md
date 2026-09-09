@@ -1,6 +1,6 @@
 # 📦 Simple Demand Forecast
 
-> I built this over 3 days while learning ML basics. It's a simple demand forecast using Linear Regression — nothing fancy, but I learned a lot from it.
+> I built this while learning ML basics. It's a simple demand forecast using Linear Regression — nothing fancy, but I learned a lot from it.
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3-orange?logo=scikit-learn&logoColor=white)
